@@ -86,7 +86,7 @@ static char backClear_key, lineClear_key, myLayer_key;
     }
     
     //通过kvc找到系统导航栏背景层，把自定义层添加到背景层
-    /* 亲测，系统背景层无法改变其属性 所以通过添加自定义层，改变自定义层上的熟悉去实现效果*/
+    /*系统背景层无法改变其属性 所以通过添加自定义层，改变自定义层上的熟悉去实现效果*/
     [[[self valueForKey:@"backgroundView"] layer] addSublayer:self.myLayer];
 }
 
@@ -108,11 +108,7 @@ static char backClear_key, lineClear_key, myLayer_key;
 - (void)navBarBottomLineHidden:(BOOL)hidden {
     //如果是自定义图层
     if (self.myLayer) {
-        if (hidden) {
-            self.myLayer.BottomLine.hidden = YES;
-        } else {
-            self.myLayer.BottomLine.hidden = NO;
-        }
+        self.myLayer.hiddenBottomLine = hidden;
         
     } else {
         //如果是系统层
@@ -147,6 +143,11 @@ static char backClear_key, lineClear_key, myLayer_key;
 @end
 
 #pragma mark -- 自定义导航栏层
+@interface MyNavLayer()
+@property (nonatomic, strong) CALayer * _Nullable backImageView;
+@property (nonatomic, strong) CALayer * _Nullable bottomLine;
+@end
+
 @implementation MyNavLayer
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super init];
@@ -167,8 +168,8 @@ static char backClear_key, lineClear_key, myLayer_key;
     [self.backImageView setFrame:CGRectMake(0, 0, width, height)];
     [self addSublayer:self.backImageView];
     
-    [self.BottomLine setFrame:CGRectMake(0, height-0.5, width, 0.5)];
-    [self addSublayer:self.BottomLine];
+    [self.bottomLine setFrame:CGRectMake(0, height-0.5, width, 0.5)];
+    [self addSublayer:self.bottomLine];
 }
 
 //底层背景层永远透明
@@ -194,6 +195,11 @@ static char backClear_key, lineClear_key, myLayer_key;
     self.backImageView.contents = (__bridge id)backImage.CGImage;
 }
 
+- (void)setHiddenBottomLine:(BOOL)hiddenBottomLine {
+    _hiddenBottomLine = hiddenBottomLine;
+    self.bottomLine.hidden = hiddenBottomLine;
+}
+
 #pragma mark -- 懒加载视图
 - (CALayer *)backImageView {
     if (!_backImageView) {
@@ -204,11 +210,11 @@ static char backClear_key, lineClear_key, myLayer_key;
     return _backImageView;
 }
 
-- (CALayer *)BottomLine {
-    if (!_BottomLine) {
-        _BottomLine = [CALayer layer];
-        [_BottomLine setBackgroundColor:[UIColor grayColor].CGColor];
+- (CALayer *)bottomLine {
+    if (!_bottomLine) {
+        _bottomLine = [CALayer layer];
+        [_bottomLine setBackgroundColor:[UIColor grayColor].CGColor];
     }
-    return _BottomLine;
+    return _bottomLine;
 }
 @end

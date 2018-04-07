@@ -40,11 +40,10 @@
 
 #pragma mark -- 自定义导航栏层
 @interface MyNavLayer :CALayer
-@property (nonatomic, strong) UIColor *backColor;
-@property (nonatomic, assign) CGFloat alpha;
-@property (nonatomic, strong) UIImage *backImage;
-@property (nonatomic, strong) CALayer *backImageView;
-@property (nonatomic, strong) CALayer *BottomLine;
+@property (nonatomic, assign) CGFloat   alpha;
+@property (nonatomic, assign) BOOL      hiddenBottomLine;
+@property (nonatomic, strong) UIColor   * _Nullable backColor;
+@property (nonatomic, strong) UIImage   * _Nullable backImage;
 
-- (instancetype)initWithFrame:(CGRect)frame;
+- (instancetype _Nullable )initWithFrame:(CGRect)frame;
 @end
