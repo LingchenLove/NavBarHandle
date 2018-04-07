@@ -72,8 +72,10 @@ static char backClear_key, lineClear_key, myLayer_key;
         CGFloat statusHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
         //导航栏高度
         CGFloat barHeight = self.bounds.size.height;
+        
         CGRect barBounds = self.bounds;
         barBounds.size.height = statusHeight + barHeight;
+        
         self.myLayer = [[MyNavLayer alloc]initWithFrame:barBounds];
     }
     
@@ -123,6 +125,23 @@ static char backClear_key, lineClear_key, myLayer_key;
         }
         [self setShadowImage:self.lineClearImage];
     }
+}
+
+- (void)navBarToBeSystem {
+    if (self.myLayer) {
+        [self.myLayer removeFromSuperlayer];
+        self.myLayer = nil;
+    }
+    if (self.lineClearImage) {
+        self.lineClearImage = nil;
+    }
+    if (self.backClearImage) {
+        self.backClearImage = nil;
+    }
+    [self setBackgroundImage:nil
+               forBarMetrics:UIBarMetricsDefault];
+    [self setShadowImage:nil];
+    self.barStyle = UIBarStyleDefault;
 }
 
 //去掉系统导航栏特征

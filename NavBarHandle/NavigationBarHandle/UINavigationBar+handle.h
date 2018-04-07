@@ -36,6 +36,9 @@
  隐藏底线
  */
 - (void)navBarBottomLineHidden:(BOOL)hidden;
+
+//还原回系统导航栏
+- (void)navBarToBeSystem;
 @end
 
 #pragma mark -- 自定义导航栏层
