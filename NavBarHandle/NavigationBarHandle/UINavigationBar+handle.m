@@ -8,15 +8,15 @@
 
 #import "UINavigationBar+handle.h"
 #import <objc/runtime.h>
-@class MyNavLayer;
+@class MyNavView;
 
 @interface UINavigationBar()
 @property (nonatomic, strong) UIImage       *backClearImage;
 @property (nonatomic, strong) UIImage       *lineClearImage;
-@property (nonatomic, strong) MyNavLayer    *myLayer; //自定义插入层，自定义操作都要在这一层上进行
+@property (nonatomic, strong) MyNavView     *myNavView; //自定义插入层，自定义操作都要在这一层上进行
 @end
 
-static char backClear_key, lineClear_key, myLayer_key;
+static char backClear_key, lineClear_key, myNavView_key;
 
 @implementation UINavigationBar (handle)
 
@@ -37,37 +37,37 @@ static char backClear_key, lineClear_key, myLayer_key;
     return objc_getAssociatedObject(self, &lineClear_key);
 }
 
-- (void)setMyLayer:(MyNavLayer *)myLayer {
-    objc_setAssociatedObject(self, &myLayer_key, myLayer, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+- (void)setMyNavView:(MyNavView *)myNavView {
+    objc_setAssociatedObject(self, &myNavView_key, myNavView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (MyNavLayer *)myLayer {
-    return objc_getAssociatedObject(self, &myLayer_key);
+- (MyNavView *)myNavView {
+    return objc_getAssociatedObject(self, &myNavView_key);
 }
 
 #pragma mark -- function
-- (void)navBarAlpha:(CGFloat)alpha {
-    [self clearSystemLayer];
-    if (!self.myLayer) {
+- (void)navBarAlpha:(CGFloat)alpha isOpaque:(BOOL)opaque {
+    [self clearSystemLayerIsOpaque:opaque];
+    if (!self.myNavView) {
         //状态栏高度
         CGFloat statusHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
         //导航栏高度
         CGFloat barHeight = self.bounds.size.height;
         CGRect barBounds = self.bounds;
         barBounds.size.height = statusHeight + barHeight;
-        self.myLayer = [[MyNavLayer alloc]initWithFrame:barBounds];
+        self.myNavView = [[MyNavView alloc]initWithFrame:barBounds];
     }
     
-    self.myLayer.alpha = alpha;
+    self.myNavView.alpha = alpha;
     
     //通过kvc找到系统导航栏背景层，把自定义层添加到背景层
     /* 系统背景层无法改变其属性 所以通过添加自定义层，改变自定义层去实现效果*/
-    [[[self valueForKey:@"backgroundView"] layer] addSublayer:self.myLayer];
+    [[self valueForKey:@"backgroundView"] addSubview:self.myNavView];
 }
 
-- (void)navBarBackGroundColor:(UIColor *)color image:(UIImage *)barImage {
-    [self clearSystemLayer];
-    if (!self.myLayer) {
+- (void)navBarBackGroundColor:(UIColor *)color image:(UIImage *)barImage isOpaque:(BOOL)opaque {
+    [self clearSystemLayerIsOpaque:opaque];
+    if (!self.myNavView) {
         //状态栏高度
         CGFloat statusHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
         //导航栏高度
@@ -76,41 +76,41 @@ static char backClear_key, lineClear_key, myLayer_key;
         CGRect barBounds = self.bounds;
         barBounds.size.height = statusHeight + barHeight;
         
-        self.myLayer = [[MyNavLayer alloc]initWithFrame:barBounds];
+        self.myNavView = [[MyNavView alloc]initWithFrame:barBounds];
     }
     
     if (color) {
-        self.myLayer.backColor = color;
+        self.myNavView.backColor = color;
     }
     
     if (barImage) {
-        self.myLayer.backImage = barImage;
+        self.myNavView.backImage = barImage;
     }
     
     //通过kvc找到系统导航栏背景层，把自定义层添加到背景层
     /*系统背景层无法改变其属性 所以通过添加自定义层，改变自定义层上的熟悉去实现效果*/
-    [[[self valueForKey:@"backgroundView"] layer] addSublayer:self.myLayer];
+    [[self valueForKey:@"backgroundView"] addSubview:self.myNavView];
 }
 
-- (void)navBarMyLayerHeight:(CGFloat)height {
+- (void)navBarMyLayerHeight:(CGFloat)height isOpaque:(BOOL)opaque {
     height = height < 0 ? 0 : height;
     
-    [self clearSystemLayer];
+    [self clearSystemLayerIsOpaque:opaque];
     
-    if (!self.myLayer) {
-        self.myLayer = [MyNavLayer layer];
+    if (!self.myNavView) {
+        self.myNavView = [[MyNavView alloc]init];
     }
-    [self.myLayer setFrame:CGRectMake(0, 0, self.bounds.size.width, height)];
+    [self.myNavView setFrame:CGRectMake(0, 0, self.bounds.size.width, height)];
 
     //通过kvc找到系统导航栏背景层，把自定义层添加到背景层
     /* 亲测，系统背景层无法改变其属性 所以通过添加自定义层，改变自定义层上的熟悉去实现效果*/
-    [[[self valueForKey:@"backgroundView"] layer] addSublayer:self.myLayer];
+    [[self valueForKey:@"backgroundView"] addSubview:self.myNavView];
 }
 
 - (void)navBarBottomLineHidden:(BOOL)hidden {
     //如果是自定义图层
-    if (self.myLayer) {
-        self.myLayer.hiddenBottomLine = hidden;
+    if (self.myNavView) {
+        self.myNavView.hiddenBottomLine = hidden;
         
     } else {
         //如果是系统层
@@ -127,10 +127,11 @@ static char backClear_key, lineClear_key, myLayer_key;
     }
 }
 
+//还原到系统初始状态
 - (void)navBarToBeSystem {
-    if (self.myLayer) {
-        [self.myLayer removeFromSuperlayer];
-        self.myLayer = nil;
+    if (self.myNavView) {
+        [self.myNavView removeFromSuperview];
+        self.myNavView = nil;
     }
     if (self.lineClearImage) {
         self.lineClearImage = nil;
@@ -145,14 +146,14 @@ static char backClear_key, lineClear_key, myLayer_key;
 }
 
 //去掉系统导航栏特征
-- (void)clearSystemLayer {
+- (void)clearSystemLayerIsOpaque:(BOOL)opaque{
     //通过插入空image把背景变透明
     if (!self.backClearImage) {
         self.backClearImage = [[UIImage alloc]init];
         [self setBackgroundImage:self.backClearImage
                    forBarMetrics:UIBarMetricsDefault];
-        self.barStyle = UIBarStyleBlackOpaque;
     }
+    self.barStyle = opaque ? UIBarStyleBlackOpaque : UIBarStyleDefault;
     //去掉系统底线，使用自定义底线
     if (!self.lineClearImage) {
         self.lineClearImage = [[UIImage alloc]init];
@@ -162,16 +163,16 @@ static char backClear_key, lineClear_key, myLayer_key;
 @end
 
 #pragma mark -- 自定义导航栏层
-@interface MyNavLayer()
-@property (nonatomic, strong) CALayer * _Nullable backImageView;
-@property (nonatomic, strong) CALayer * _Nullable bottomLine;
+@interface MyNavView()
+@property (nonatomic, strong) UIImageView * _Nullable backImageView;
+@property (nonatomic, strong) UIView * _Nullable bottomLine;
 @end
 
-@implementation MyNavLayer
+@implementation MyNavView
 - (instancetype)initWithFrame:(CGRect)frame {
-    self = [super init];
+    self = [super initWithFrame:frame];
     if (self) {
-        self.frame = frame;
+       
     }
     return self;
 }
@@ -185,33 +186,33 @@ static char backClear_key, lineClear_key, myLayer_key;
     CGFloat height = frame.size.height;
     CGFloat width = frame.size.width;
     [self.backImageView setFrame:CGRectMake(0, 0, width, height)];
-    [self addSublayer:self.backImageView];
+    [self addSubview:self.backImageView];
     
     [self.bottomLine setFrame:CGRectMake(0, height-0.5, width, 0.5)];
-    [self addSublayer:self.bottomLine];
+    [self addSubview:self.bottomLine];
 }
 
 //底层背景层永远透明
-- (void)setBackgroundColor:(CGColorRef)backgroundColor {
-    [super setBackgroundColor:[UIColor clearColor].CGColor];
+- (void)setBackgroundColor:(UIColor *)backgroundColor {
+    [super setBackgroundColor:[UIColor clearColor]];
 }
 
 //设置图片背景颜色
 - (void)setBackColor:(UIColor *)backColor {
     _backColor = backColor;
-    self.backImageView.backgroundColor = backColor.CGColor;
+    self.backImageView.backgroundColor = backColor;
 }
 
 //设置图片背景透明度
 - (void)setAlpha:(CGFloat)alpha {
     _alpha = alpha;
-    self.backImageView.opacity = alpha;
+    self.backImageView.alpha = alpha;
 }
 
 //设置图片
 - (void)setBackImage:(UIImage *)backImage {
     _backImage = backImage;
-    self.backImageView.contents = (__bridge id)backImage.CGImage;
+    self.backImageView.image = backImage;
 }
 
 - (void)setHiddenBottomLine:(BOOL)hiddenBottomLine {
@@ -220,19 +221,19 @@ static char backClear_key, lineClear_key, myLayer_key;
 }
 
 #pragma mark -- 懒加载视图
-- (CALayer *)backImageView {
+- (UIImageView *)backImageView {
     if (!_backImageView) {
-        _backImageView = [CALayer layer];
-        _backImageView.masksToBounds = YES;
-        _backImageView.contentsGravity = kCAGravityResizeAspectFill;
+        _backImageView = [UIImageView new];
+        _backImageView.clipsToBounds = YES;
+        _backImageView.contentMode = UIViewContentModeTop;
     }
     return _backImageView;
 }
 
-- (CALayer *)bottomLine {
+- (UIView *)bottomLine {
     if (!_bottomLine) {
-        _bottomLine = [CALayer layer];
-        [_bottomLine setBackgroundColor:[UIColor grayColor].CGColor];
+        _bottomLine = [UIView new];
+        [_bottomLine setBackgroundColor:[UIColor grayColor]];
     }
     return _bottomLine;
 }

@@ -18,9 +18,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.title = @"红色导航栏";
-    [self.navigationController.navigationBar navBarBackGroundColor:[UIColor redColor] image:nil];//颜色
-    [self.navigationController.navigationBar navBarMyLayerHeight:90];//背景高度
-//    [self.navigationController.navigationBar navBarAlpha:0];//透明度
+    [self.navigationController.navigationBar navBarBackGroundColor:[UIColor redColor] image:nil isOpaque:YES];//颜色
+    [self.navigationController.navigationBar navBarMyLayerHeight:90 isOpaque:YES];//背景高度
+//    [self.navigationController.navigationBar navBarAlpha:0 isOpaque:YES];//透明度
 //    [self.navigationController.navigationBar navBarBottomLineHidden:YES];//隐藏底线
 }
 
