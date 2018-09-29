@@ -88,7 +88,7 @@ static char backClear_key, lineClear_key, myNavView_key;
     }
     
     //通过kvc找到系统导航栏背景层，把自定义层添加到背景层
-    /*系统背景层无法改变其属性 所以通过添加自定义层，改变自定义层上的熟悉去实现效果*/
+    /*系统背景层无法改变其属性 所以通过添加自定义层，改变自定义层上的属性去实现效果*/
     [[self valueForKey:@"backgroundView"] addSubview:self.myNavView];
 }
 
@@ -103,7 +103,7 @@ static char backClear_key, lineClear_key, myNavView_key;
     [self.myNavView setFrame:CGRectMake(0, 0, self.bounds.size.width, height)];
 
     //通过kvc找到系统导航栏背景层，把自定义层添加到背景层
-    /* 亲测，系统背景层无法改变其属性 所以通过添加自定义层，改变自定义层上的熟悉去实现效果*/
+    /* 亲测，系统背景层无法改变其属性 所以通过添加自定义层，改变自定义层上的属性去实现效果*/
     [[self valueForKey:@"backgroundView"] addSubview:self.myNavView];
 }
 
