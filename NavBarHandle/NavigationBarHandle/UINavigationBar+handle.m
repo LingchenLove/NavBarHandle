@@ -14,9 +14,10 @@
 @property (nonatomic, strong) UIImage       *backClearImage;
 @property (nonatomic, strong) UIImage       *lineClearImage;
 @property (nonatomic, strong) MyNavView     *myNavView; //自定义插入层，自定义操作都要在这一层上进行
+@property (nonatomic, assign) BOOL          hiddenBottom;
 @end
 
-static char backClear_key, lineClear_key, myNavView_key;
+static char backClear_key, lineClear_key, myNavView_key, hiddenBottom_key;
 
 @implementation UINavigationBar (handle)
 
@@ -45,6 +46,14 @@ static char backClear_key, lineClear_key, myNavView_key;
     return objc_getAssociatedObject(self, &myNavView_key);
 }
 
+- (void)setHiddenBottom:(BOOL)hiddenBottom {
+    objc_setAssociatedObject(self, &hiddenBottom_key, @(hiddenBottom), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (BOOL)hiddenBottom {
+    return [objc_getAssociatedObject(self, &hiddenBottom_key) boolValue];
+}
+
 #pragma mark -- function
 - (void)navBarAlpha:(CGFloat)alpha isOpaque:(BOOL)opaque {
     [self clearSystemLayerIsOpaque:opaque];
@@ -56,6 +65,7 @@ static char backClear_key, lineClear_key, myNavView_key;
         CGRect barBounds = self.bounds;
         barBounds.size.height = statusHeight + barHeight;
         self.myNavView = [[MyNavView alloc]initWithFrame:barBounds];
+        [self navBarBottomLineHidden:self.hiddenBottom];
     }
     
     self.myNavView.alpha = alpha;
@@ -77,6 +87,7 @@ static char backClear_key, lineClear_key, myNavView_key;
         barBounds.size.height = statusHeight + barHeight;
         
         self.myNavView = [[MyNavView alloc]initWithFrame:barBounds];
+        [self navBarBottomLineHidden:self.hiddenBottom];
     }
     
     if (color) {
@@ -99,6 +110,7 @@ static char backClear_key, lineClear_key, myNavView_key;
     
     if (!self.myNavView) {
         self.myNavView = [[MyNavView alloc]init];
+        [self navBarBottomLineHidden:self.hiddenBottom];
     }
     [self.myNavView setFrame:CGRectMake(0, 0, self.bounds.size.width, height)];
 
@@ -108,8 +120,9 @@ static char backClear_key, lineClear_key, myNavView_key;
 }
 
 - (void)navBarBottomLineHidden:(BOOL)hidden {
+    self.hiddenBottom = hidden;
     //如果是自定义图层
-    if (self.myNavView) {
+    if (self.myNavView && self.myNavView.hiddenBottomLine != hidden) {
         self.myNavView.hiddenBottomLine = hidden;
         
     } else {
@@ -117,13 +130,14 @@ static char backClear_key, lineClear_key, myNavView_key;
         if (hidden) {
             if (!self.lineClearImage) {
                 self.lineClearImage = [[UIImage alloc]init];
+                [self setShadowImage:self.lineClearImage];
             }
         } else {
             if (self.lineClearImage) {
                 self.lineClearImage = nil;
+                [self setShadowImage:self.lineClearImage];
             }
         }
-        [self setShadowImage:self.lineClearImage];
     }
 }
 
