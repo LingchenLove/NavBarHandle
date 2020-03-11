@@ -9,6 +9,14 @@
 #import <UIKit/UIKit.h>
 
 @interface UINavigationBar (handle)
+
+/**
+ 更改标题颜色和大小
+ @param color 标题颜色
+ @param font 标题大小
+ */
+- (void)navBarTitleColor:(UIColor *_Nullable)color font:(UIFont *_Nullable)font;
+
 /**
  更改导航栏颜色和图片
 

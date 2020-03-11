@@ -55,6 +55,11 @@ static char backClear_key, lineClear_key, myNavView_key, hiddenBottom_key;
 }
 
 #pragma mark -- function
+- (void)navBarTitleColor:(UIColor *)color font:(UIFont *)font {
+    [self setTitleTextAttributes:@{NSForegroundColorAttributeName : color,
+    NSFontAttributeName : font}];
+}
+
 - (void)navBarAlpha:(CGFloat)alpha isOpaque:(BOOL)opaque {
     [self clearSystemLayerIsOpaque:opaque];
     if (!self.myNavView) {
