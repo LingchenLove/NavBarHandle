@@ -1,5 +1,15 @@
 # NavBarHandle
+说明：
+
+由于该项目功能过于简单，就两个文件，所以就没导入到cocoapods管理，使用的话需要下载以下两个分类放入到工程中
+
+```
+UINavigationBar+handle.h
+UINavigationBar+handle.m
+```
+
 使用方法：
+
 导入分类头文件
 ```
 #import "UINavigationBar+handle.h"
